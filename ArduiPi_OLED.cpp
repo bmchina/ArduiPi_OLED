@@ -567,23 +567,32 @@ void ArduiPi_OLED::begin( void )
   {
     sendCommand(SSD1306_Charge_Pump_Setting, chargepump); 
     sendCommand(SSD1306_Set_Memory_Mode, 0x00);              // 0x20 0x0 act like ks0108
-    sendCommand(SSD1306_Set_Display_Clock_Div, 0x80);      // 0xD5 + the suggested ratio 0x80
-    sendCommand(SSD1306_Set_Display_Offset, 0x00);        // no offset
-    sendCommand(SSD1306_Set_Start_Line | 0x0);            // line #0
-    // use this two commands to flip display
-    sendCommand(SSD_Set_Segment_Remap | 0x1);
-    sendCommand(SSD1306_Set_Com_Output_Scan_Direction_Remap);
     
-    sendCommand(SSD1306_Set_Com_Pins, compins);  
-    sendCommand(SSD1306_Set_Precharge_Period, precharge); 
-    sendCommand(SSD1306_Set_Vcomh_Deselect_Level, 0x40); // 0x40 -> unknown value in datasheet
-    sendCommand(SSD1306_Entire_Display_Resume);    
-    sendCommand(SSD1306_Normal_Display);         // 0xA6
-
-    // Reset to default value in case of 
-    // no reset pin available on OLED, 
-    sendCommand( SSD_Set_Column_Address, 0, 127 ); 
-    sendCommand( SSD_Set_Page_Address, 0,   7 ); 
+    sendCommand( SSD_Set_Column_Address, 0, 127 ); // Reset to default value in case of 
+    sendCommand( SSD_Set_Page_Address, 0,   7 );  // no reset pin available on OLED, 
+   
+    /////////////
+    sendCommand(SSD1306_Set_Lower_Column_Start_Address|0x00); /*set lower column address*/
+    sendCommand(SSD1306_Set_Higher_Column_Start_Address);     /*set higher column address*/
+    sendCommand(SSD1306_Set_Start_Line);                      /*set display start line*/
+    sendCommand(SH1106_Set_Page_Address);    /*set page address*/
+    sendCommand(SSD_Set_Segment_Remap|0x01); /*set segment remap*/
+    sendCommand(SSD1306_Normal_Display);     /*normal / reverse*/
+    sendCommand(0xad);    /*set charge pump enable*/
+    sendCommand(0x8b);    /*external VCC   */
+    sendCommand(0x30);    /*0X30---0X33  set VPP   9V liangdu!!!!*/
+    sendCommand(SSD1306_Set_Com_Output_Scan_Direction_Remap);    /*Com scan direction*/
+    sendCommand(SSD1306_Set_Display_Offset);    /*set display offset*/
+    sendCommand(0x00);   /*   0x20  */
+    sendCommand(SSD1306_Set_Display_Clock_Div);    /*set osc division*/
+    sendCommand(0x80);
+    sendCommand(SSD1306_Set_Precharge_Period);    /*set pre-charge period*/
+    sendCommand(0x1f);    /*0x22*/
+    sendCommand(SSD1306_Set_Com_Pins);    /*set COM pins*/
+    sendCommand(0x12);
+    sendCommand(SSD1306_Set_Vcomh_Deselect_Level);    /*set vcomh*/
+    sendCommand(0x40);
+    /////////////
   }
 
   sendCommand(SSD_Set_ContrastLevel, contrast);
@@ -925,7 +934,7 @@ void ArduiPi_OLED::display(void)
       for (uint8_t k=0; k<8; k++) 
       {
         sendCommand(0xB0+k);//set page addressSSD_Data_Mode;
-        sendCommand(0x02) ;//set lower column address
+        sendCommand(0x00) ;//set lower column address
         sendCommand(0x10) ;//set higher column address
 
        for( i=0; i<8; i++)
